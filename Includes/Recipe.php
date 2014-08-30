@@ -1,12 +1,7 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jgardezi
- * Date: 27/08/2014
- * Time: 8:52 AM
- */
 
-class Recipe {
+class Recipe
+{
 
     // recipe name
     private $recipeName;
@@ -46,17 +41,65 @@ class Recipe {
         return $this->recipeName;
     }
 
-    public function setRecipies($json) {
-        // initialize data from json file
-    }
-
-
+    /**
+     * Get all recipes.
+     *
+     * @return Recipe[]
+     * @throws Exception
+     */
     public function getRecipies() {
+        $recipes = array();
+        $recipesData = $this->jsonFileToArray('recipes.json');
 
+        if(!$recipesData) {
+            throw new Exception('No recipes found.');
+        }
+
+        if(!empty($recipesData)) {
+            foreach($recipesData as $recipe) {
+                $instance = new self();
+                $instance->setRecipeName($recipe['name']);
+                $instance->setIngredients($recipe['ingredients']);
+                $recipes[] = $instance;
+            }
+        }
+
+        return $recipes;
     }
 
-    public function getRecommendationTonight() {
+    /**
+     * Get recommended recipe for night
+     *
+     * @param FridgeItem[]
+     */
+    public function getRecommendationTonight(FridgeItem $item)
+    {
         // make all the recipies
+    }
+
+
+    /**
+     * Read JSON from file and coverts it into array
+     *
+     * @param string $filename
+     * @return array|bool
+     * @throws Exception
+     */
+    private function jsonFileToArray($filename='')
+    {
+        if(!file_exists($filename) || !is_readable($filename)) {
+            return FALSE;
+        }
+
+        $data = array();
+        if($json = json_decode(file_get_contents($filename), true)) {
+            $data = $json;
+        } else {
+            $data = FALSE;
+            throw new Exception("Unable to read JSON from a file");
+        }
+
+        return $data;
     }
 
 

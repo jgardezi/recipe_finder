@@ -1,12 +1,7 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jgardezi
- * Date: 27/08/2014
- * Time: 8:51 AM
- */
 
-class FridgeItems {
+class FridgeItem
+{
 
     // the name of the ingredient
     private $itemName;
@@ -84,12 +79,6 @@ class FridgeItems {
         return $this->unit;
     }
 
-    public function setFridgeItemsData($csv=null)
-    {
-
-
-    }
-
     /**
      * Gets all the items in the fridge.
      *
@@ -100,7 +89,7 @@ class FridgeItems {
     {
         $fridgeItems = array();
         // use csv file to read the
-        $csvArrayData = $this->csv_to_array('fridge_items.csv');
+        $csvArrayData = $this->csvfileToArray('fridge_items.csv');
         if(!$csvArrayData) {
             throw new Exception('No item in the fridge');
         }
@@ -123,7 +112,7 @@ class FridgeItems {
      * @param string $delimiter CSV file separator
      * @return array|bool
      */
-    private function csv_to_array($filename='', $delimiter=',')
+    private function csvfileToArray($filename='', $delimiter=',')
     {
         if(!file_exists($filename) || !is_readable($filename)) {
             return FALSE;
