@@ -32,7 +32,7 @@ class FridgeItem
     }
 
     /**
-     * @param mixed $expiryDate
+     * @param DateTime $expiryDate
      */
     public function setExpiryDate($expiryDate)
     {
@@ -40,7 +40,7 @@ class FridgeItem
     }
 
     /**
-     * @return mixed
+     * @return DateTime
      */
     public function getExpiryDate()
     {
@@ -87,7 +87,7 @@ class FridgeItem
      */
     public function getFridgeItemsData()
     {
-        $fridgeItems = array();
+        $fridgeItems = FALSE;
         // use csv file to read the
         $csvArrayData = $this->csvfileToArray('fridge_items.csv');
         if(!$csvArrayData) {
@@ -99,7 +99,9 @@ class FridgeItem
             $instance->setItemName($item['item']);
             $instance->setAmount($item['amount']);
             $instance->setUnit($item['unit']);
-            $instance->setExpiryDate($item['use-by']);
+            //$expDate = str_replace('/', '-', $item['use-by']);
+            $date = (isset($item['use-by'])) ? new \DateTime(str_replace('/', '-', $item['use-by'])) : '';
+            $instance->setExpiryDate($date);
             $fridgeItems[] = $instance;
         }
         return $fridgeItems;

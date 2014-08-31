@@ -42,13 +42,22 @@ class Recipe
     }
 
     /**
+     * Get current date time.
+     *
+     * @return DateTime
+     */
+    public function getCurrentDate() {
+        return new DateTime('now');
+    }
+
+    /**
      * Get all recipes.
      *
      * @return Recipe[]
      * @throws Exception
      */
-    public function getRecipies() {
-        $recipes = array();
+    public function getRecipes() {
+        $recipes = FALSE;
         $recipesData = $this->jsonFileToArray('recipes.json');
 
         if(!$recipesData) {
@@ -70,11 +79,90 @@ class Recipe
     /**
      * Get recommended recipe for night
      *
-     * @param FridgeItem[]
+     * @param array $fridgeItems
+     * @return array
      */
-    public function getRecommendationTonight(FridgeItem $item)
+    public function getRecommendationTonight($fridgeItems = array())
     {
+        $recRecipe = FALSE;
+        $recipesFound = array();
+        $matchedFridgeItems = array();
+        $allRecipes = $this->getRecipes();
         // make all the recipies
+        if(!empty($fridgeItems) || !empty($allRecipes)) {
+            foreach($allRecipes as $recipe) {
+                //find $recipe items in a fridge
+                if($matchedFridgeItems = $this->findRecipeIngredients($fridgeItems, $recipe)) {
+                    $recipesFound[] = array(
+                        'name'  => $recipe,
+                        'items' => $matchedFridgeItems,
+                    );
+                }
+            }
+
+            // assign the first found recipe
+            $recRecipe = $recipesFound[0];
+
+            // check if more than one recommended recipes found
+            if(count($recipesFound) > 1) {
+                $recRecipeDateDiff = $recRecipe['items'];
+                foreach($recipesFound as $fRecipe) {
+                    if($fRecipe['items']['smallestExpDate'] < $recRecipe['items']['smallestExpDate']) {
+                        $recRecipe = $fRecipe;
+                    }
+                }
+            }
+        } else {
+            $recRecipe['error'] = "Either ";
+        }
+        return $recRecipe;
+    }
+
+    /**
+     * Find recipe ingredients in the fridge base on
+     *  items, amount availability and expiry date.
+     *
+     * @param array $fridgeItems
+     * @param self
+     * @return array Item found
+     */
+    private function findRecipeIngredients($fridgeItems, $recipe)
+    {
+        $itemsFound = FALSE;
+        $matchedFridgeItem = array();
+        $recipeItems = $recipe->getIngredients();
+
+        if(!empty($recipeItems)) {
+            $recpItemsExist = FALSE;
+            foreach($recipeItems as $recipeItem) {
+                foreach($fridgeItems as $fridgeItem) {
+                    if($fridgeItem->getItemName() == $recipeItem['item']
+                        && $fridgeItem->getUnit() == $recipeItem['unit']) {
+                        // if recipe item is found, check the amount and expiry date
+                        if($recipeItem['amount'] <= $fridgeItem->getAmount()
+                            && $this->getCurrentDate() <= $fridgeItem->getExpiryDate()) {
+                            $interval = $fridgeItem->getExpiryDate()->diff($this->getCurrentDate());
+                            $matchedFridgeItem[] = array(
+                                'fridgeItems' => $fridgeItem,
+                                'dateDiffRecipeItem'    => $interval->d,
+                            );
+                            break;
+                        }
+                    }
+                }
+            }
+            if(count($recipeItems) == count($matchedFridgeItem)) {
+                $itemsFound = $matchedFridgeItem;
+                $itemsFound['smallestExpDate'] = $matchedFridgeItem[0]['dateDiffRecipeItem'];
+                foreach($matchedFridgeItem as $fItem) {
+                    if($fItem['dateDiffRecipeItem'] <  $itemsFound['smallestExpDate']) {
+                        $itemsFound['smallestExpDate'] = $fItem['dateDiffRecipeItem'];
+                    }
+                }
+            }
+        }
+
+        return $itemsFound;
     }
 
 
