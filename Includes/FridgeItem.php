@@ -99,7 +99,6 @@ class FridgeItem
             $instance->setItemName($item['item']);
             $instance->setAmount($item['amount']);
             $instance->setUnit($item['unit']);
-            //$expDate = str_replace('/', '-', $item['use-by']);
             $date = (isset($item['use-by'])) ? new \DateTime(str_replace('/', '-', $item['use-by'])) : '';
             $instance->setExpiryDate($date);
             $fridgeItems[] = $instance;

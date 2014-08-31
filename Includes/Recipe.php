@@ -66,10 +66,12 @@ class Recipe
 
         if(!empty($recipesData)) {
             foreach($recipesData as $recipe) {
-                $instance = new self();
-                $instance->setRecipeName($recipe['name']);
-                $instance->setIngredients($recipe['ingredients']);
-                $recipes[] = $instance;
+                if(!empty($recipe)) {
+                    $instance = new self();
+                    $instance->setRecipeName($recipe['name']);
+                    $instance->setIngredients($recipe['ingredients']);
+                    $recipes[] = $instance;
+                }
             }
         }
 
@@ -80,7 +82,8 @@ class Recipe
      * Get recommended recipe for night
      *
      * @param array $fridgeItems
-     * @return array
+     * @return bool
+     * @throws Exception
      */
     public function getRecommendationTonight($fridgeItems = array())
     {
@@ -88,6 +91,11 @@ class Recipe
         $recipesFound = array();
         $matchedFridgeItems = array();
         $allRecipes = $this->getRecipes();
+
+        if(empty($allRecipes)) {
+            throw new Exception('No recipes found!');
+        }
+
         // make all the recipies
         if(!empty($fridgeItems) || !empty($allRecipes)) {
             foreach($allRecipes as $recipe) {
@@ -100,21 +108,24 @@ class Recipe
                 }
             }
 
-            // assign the first found recipe
-            $recRecipe = $recipesFound[0];
-
-            // check if more than one recommended recipes found
-            if(count($recipesFound) > 1) {
-                $recRecipeDateDiff = $recRecipe['items'];
-                foreach($recipesFound as $fRecipe) {
-                    if($fRecipe['items']['smallestExpDate'] < $recRecipe['items']['smallestExpDate']) {
-                        $recRecipe = $fRecipe;
+            if(empty($recipesFound)) {
+                $recRecipe['error'] = 'Order Takeout';
+            } else {
+                // assign the first found recipe
+                $recRecipe = $recipesFound[0];
+                // check if more than one recommended recipes found
+                if(count($recipesFound) > 1) {
+                    $recRecipeDateDiff = $recRecipe['items'];
+                    foreach($recipesFound as $fRecipe) {
+                        if($fRecipe['items']['smallestExpDate'] < $recRecipe['items']['smallestExpDate']) {
+                            $recRecipe = $fRecipe;
+                        }
                     }
                 }
             }
-        } else {
-            $recRecipe['error'] = "Either ";
+
         }
+
         return $recRecipe;
     }
 
