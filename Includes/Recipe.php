@@ -53,12 +53,13 @@ class Recipe
     /**
      * Get all recipes.
      *
-     * @return Recipe[]
+     * @param string $filename
+     * @return array|bool
      * @throws Exception
      */
-    public function getRecipes() {
+    public function getRecipes($filename='') {
         $recipes = FALSE;
-        $recipesData = $this->jsonFileToArray('recipes.json');
+        $recipesData = $this->jsonFileToArray($filename);
 
         if(!$recipesData) {
             throw new Exception('No recipes found.');
@@ -82,18 +83,23 @@ class Recipe
      * Get recommended recipe for night
      *
      * @param array $fridgeItems
+     * @param $allRecipes
      * @return bool
      * @throws Exception
      */
-    public function getRecommendationTonight($fridgeItems = array())
+    public function getRecommendationTonight($fridgeItems = array(), $allRecipes='')
     {
         $recRecipe = FALSE;
         $recipesFound = array();
         $matchedFridgeItems = array();
-        $allRecipes = $this->getRecipes();
+        //$allRecipes = $this->getRecipes();
 
         if(empty($allRecipes)) {
             throw new Exception('No recipes found!');
+        }
+
+        if(empty($fridgeItems)) {
+            throw new Exception('No items found in the fridge!');
         }
 
         // make all the recipies

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit colors="true">
+    <testsuites>
+        <testsuite name="Recipe Finder Test Suite">
+            <file>Tests/Includes/FridgeItemTest.php</file>
+            <file>Tests/Includes/RecipeTest.php</file>
+        </testsuite>
+    </testsuites>
+</phpunit>

@@ -82,14 +82,15 @@ class FridgeItem
     /**
      * Gets all the items in the fridge.
      *
-     * @return array
+     * @param string $filename
+     * @return array|bool
      * @throws Exception
      */
-    public function getFridgeItemsData()
+    public function getFridgeItemsData($filename='')
     {
         $fridgeItems = FALSE;
         // use csv file to read the
-        $csvArrayData = $this->csvfileToArray('fridge_items.csv');
+        $csvArrayData = $this->csvfileToArray($filename);
         if(!$csvArrayData) {
             throw new Exception('No item in the fridge');
         }
